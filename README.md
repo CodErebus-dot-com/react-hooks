@@ -1,0 +1,359 @@
+# React Hooks
+
+A collection of custom react hooks
+
+![npm](https://img.shields.io/npm/v/@coderebus/react-hooks?logo=npm)
+![NPM](https://img.shields.io/npm/l/%40coderebus%2Freact-hooks)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/%40coderebus%2Freact-hooks)
+![Coverage](https://img.shields.io/badge/coverage-95-emeraldgreen)
+
+Badges from [Shields](https://shields.io/)
+
+## Table of Contents
+
+- [Installation](#installation)
+- Hooks
+  - [useFetch()](#usefetch)
+  - [useLocalStorage()](#uselocalstorage)
+  - [useSessionStorage()](#usesessionstorage)
+  - [useIntersectionObserver()](#useintersectionobserver)
+  - [useDebounce()](#usedebounce)
+  - [useThrottle()](#usethrottle)
+  - [useLocalizedContent()](#uselocalizedcontent)
+
+## Installation
+
+```bash
+#using npm
+npm install @coderebus/react-hooks
+
+#using yarn
+yarn add @coderebus/react-hooks
+
+#using pnpm
+pnpm add @coderebus/react-hooks
+```
+
+## useFetch()
+
+useFetch hook is used to make fetch calls. It returns the data, error and loading states. It should be used ideally for 'GET', 'POST', 'PUT', 'PATCH' and 'DELETE' methods.
+
+| Parameter | Required | Type     | Default                                            | Description                                      |
+| --------- | -------- | -------- | -------------------------------------------------- | ------------------------------------------------ |
+| `url`     | Yes      | `string` | `N.A`                                              | The url to be used for the fetch call            |
+| `options` | No       | `object` | `Default Options` [refer](#default-options-object) | The options object to be used for the fetch call |
+
+### Usage
+
+a. GET method
+
+- If you want to use 'GET' method, then you do not have to provide the options object.
+- If you are providing the options object, you do not have to explicitly provide the method property, as 'GET' is assumed by default.
+
+```jsx
+import { useFetch } from "@coderebus/react-hooks";
+
+const { data, error, loading } = useFetch(url);
+
+if (loading) {
+  return <div>Loading...</div>;
+}
+
+if (error) {
+  return <div>Error: {error}</div>;
+}
+
+return <div>{data}</div>;
+```
+
+b. POST (and other mutation methods)
+
+If you want to use any method other than 'GET', then you have to provide the options object with the method and body properties.
+
+```jsx
+const options = {
+    method: 'POST' (required),
+    body: {
+        title: 'foo',
+        body: 'bar',
+    } (required)
+    other similar fetchOptions...
+}
+
+const { data, error, loading } = useFetch(url, options)
+```
+
+### Default options object
+
+These are the default properties (options) that are used if you do not provide any options object or its properties.
+
+```jsx
+const options = {
+  method: "GET", // 'POST', 'PUT', 'PATCH'...
+  headers: {
+    "Content-Type": "application/json",
+  },
+  credentials: "same-origin", // 'omit', 'include'
+  mode: "cors", // 'no-cors', 'same-origin'
+  cache: "default", // 'no-cache', 'reload', 'force-cache', 'only-if-cached'
+  redirect: "follow", // 'manual', 'error'
+  referrerPolicy: "no-referrer",
+  refetch: 3, // number of times to refetch in case of error
+  retryAfter: 1000, // time in milliseconds to wait before retrying
+};
+```
+
+## useLocalStorage()
+
+useLocalStorage hook is used to store data in the browser's local storage.
+
+| Parameter      | Required | Type     | Default | Description                                                 |
+| -------------- | -------- | -------- | ------- | ----------------------------------------------------------- |
+| `key`          | Yes      | `string` | `N.A`   | The key to be used to store the data in the session storage |
+| `initialValue` | No       | `any`    | `null`  | The initial value to be set in the local storage            |
+
+- The hook returns an array of two elements
+- The first element is the value stored in the local storage
+- The second element is a function to set the value in the local storage
+
+### Usage
+
+```jsx
+import { useLocalStorage } from "@coderebus/react-hooks";
+
+const [value, setValue] = useLocalStorage<{ name: string }>("name");
+
+const handleSetValue = () => {
+  setValue({ name: "Jane Doe" });
+};
+
+const handleRemoveValue = () => {
+  setValue(null);
+};
+
+return (
+  <div>
+    <button onClick={handleSetValue}>Add Value</button>
+    <button onClick={handleRemoveValue}>Delete Value</button>
+  </div>
+);
+```
+
+## useSessionStorage()
+
+useSessionStorage hook is used to store data in the browser's session storage.
+
+| Parameter      | Required | Type     | Default | Description                                                 |
+| -------------- | -------- | -------- | ------- | ----------------------------------------------------------- |
+| `key`          | Yes      | `string` | `N.A`   | The key to be used to store the data in the session storage |
+| `initialValue` | No       | `any`    | `null`  | The initial value to be set in the session storage          |
+
+- The hook returns an array of two elements
+- The first element is the value stored in the session storage
+- The second element is a function to set the value in the session storage
+
+### Usage
+
+```jsx
+import { useSessionStorage } from "@coderebus/react-hooks";
+
+const [tokenId, setTokenId] = useSessionStorage<{ token: string }>("token");
+
+const addTokenId = () => {
+  setTokenId({ token: "jvV8VIjvhadV73WEVjh7VKHJ798ha" });
+};
+
+const removeTokenId = () => {
+  setTokenId(null);
+};
+
+return (
+  <div>
+    <button onClick={addTokenId}>Add Token</button>
+    <button onClick={removeTokenId}>Delete Token</button>
+  </div>
+);
+```
+
+## useIntersectionObserver()
+
+useIntersectionObserver hook is used to observe the intersection of a target element with the viewport.
+
+| Parameter           | Required | Type                   | Default                        | Description                                                                                                                             |
+| ------------------- | -------- | ---------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `elemRef`           | No       | `RefObject<Element>`   | `useRef<HTMLDivElement>(null)` | The ref of the target element                                                                                                           |
+| `root`              | No       | `Element`              | `null`                         | The element that is used as the viewport for checking target's intersection                                                             |
+| `rootMargin`        | No       | `string`               | `0%`                           | The margin around the root                                                                                                              |
+| `threshold`         | No       | `number` or `number[]` | `0`                            | A number or an array of numbers which indicate at what percentage of the target's visibility the observer's callback should be executed |
+| `freezeOnceVisible` | No       | `boolean`              | `false`                        | A boolean value indicating whether the observer should only run once or not                                                             |
+
+- The hook returns an array of two elements
+- The first element is the `isIntersecting` flag which is true when the target element is intersecting with the viewport
+- The second element is the target element's `ref`
+
+### Usage
+
+a. using default values
+
+```jsx
+import { useIntersectionObserver } from "@coderebus/react-hooks";
+const [isIntersecting, targetRef] = useIntersectionObserver(ref, {});
+
+return (
+  <div>
+    <div ref={targetRef}>Target Element</div>
+    <div>{isIntersecting ? "Intersecting" : "Not Intersecting"}</div>
+  </div>
+);
+```
+
+b. using custom values
+
+```jsx
+import { useIntersectionObserver } from "@coderebus/react-hooks";
+import { useRef } from "react";
+
+const ref = useRef<HTMLDivElement | null>(null); // custom ref element
+const [isIntersecting] = useIntersectionObserver(ref, {
+  root: null,
+  rootMargin: "10px",
+  threshold: 0.5,
+  freezeOnceVisible: true,
+});
+
+return (
+  <div>
+    <div ref={ref}>Target Element</div>
+    <div>{isIntersecting ? "Intersecting" : "Not Intersecting"}</div>
+  </div>
+);
+```
+
+## useDebounce()
+
+useDebounce hook is used to delay the execution of a function until after a certain amount of time has elapsed since its last invocation. Refer [here](https://dev.to/jeetvora331/javascript-debounce-easiest-explanation--29hc) for a detailed explanation on debouncing.
+
+| Parameter | Required | Type     | Default | Description                                                    |
+| --------- | -------- | -------- | ------- | -------------------------------------------------------------- |
+| `value`   | Yes      | `any`    | `N.A`   | The value to be debounced                                      |
+| `delay`   | No       | `number` | `500`   | The time in milliseconds to wait before executing the function |
+
+The hook returns the debounced value.
+
+### Usage
+
+```jsx
+import { ChangeEvent, useState } from 'react';
+import { useDebounce } from "@coderebus/react-hooks";
+
+const [searchTerm, setSearchTerm] = useState<string>('');
+const debouncedSearch = useDebounce<string>(searchTerm, 500);
+
+const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  setSearchTerm(e.target.value);
+};
+
+return (
+  <div>
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={handleChange}
+      placeholder="Search..."
+    />
+    <div>{debouncedValue}</div>
+  </div>
+);
+```
+
+## useThrottle()
+
+useThrottle hook is used to limit the number of times a function can be called in a given time period. Refer [here](https://dev.to/jeetvora331/throttling-in-javascript-easiest-explanation-1081) for a detailed explanation on throttling.
+
+| Parameter | Required | Type     | Default | Description                                         |
+| --------- | -------- | -------- | ------- | --------------------------------------------------- |
+| `value`   | Yes      | `any`    | `N.A`   | The value to be throttled                           |
+| `delay`   | No       | `number` | `500`   | The time in milliseconds between the function calls |
+
+The hook returns the throttled value.
+
+### Usage
+
+```jsx
+import { useState, useEffect } from "react";
+import { useThrottle } from "@coderebus/react-hooks";
+
+const [scrollPosition, setScrollPosition] = useState(0);
+const throttledValue = useThrottle(scrollPosition, 200);
+
+const handleScroll = () => {
+  setScrollPosition(window.scrollY);
+};
+
+useEffect(() => {
+  window.addEventListener("scroll", handleScroll);
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+  };
+}, [handleScroll]);
+
+return (
+  <div>
+    <div>{throttledValue}</div>
+    Scroll Position: {scrollPosition}
+  </div>
+);
+```
+
+## useLocalizedContent()
+
+useLocalizedContent hook is used to handle localized content retrieval, caching, and language management.
+
+| Parameter            | Required | Type     | Default                                            | Description                                                                                                              |
+| -------------------- | -------- | -------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `url`                | Yes      | `string` | `N.A`                                              | The url to be used for the fetch call                                                                                    |
+| `languageStorageKey` | No       | `string` | `undefined`                                        | The key to be used to store the language in the local storage. If not provided, `en_us` is used as the default language. |
+| `fetchOptions`       | No       | `object` | `Default Options` [refer](#default-options-object) | The options object to be used for the fetch call                                                                         |
+
+- The hook returns an array of three elements.
+- The first element is the `loading` flag indicating whether the content is currently loading.
+- The second element is the `getLabel` function that accepts a label name and returns the corresponding localized content.
+- The third element is the `getAllLabels` function that returns all localized content for the given URL and language.
+
+### Usage
+
+```jsx
+import { useLocalizedContent, useLocalStorage } from "@coderebus/react-hooks";
+
+const url = "/data"; // BASE_PATH
+const [data, setData] = useLocalStorage("my-language-key", "es_es");
+const [loading, getLabel, getAllLabels] = useLocalizedContent(
+  url,
+  "my-language-key"
+);
+
+const title = getLabel("title");
+const description = getLabel("description");
+const allLabels = getAllLabels();
+
+const changeLanguage = (newLanguage) => {
+  setData(newLanguage);
+};
+
+if (loading) {
+  return <div>Loading...</div>;
+}
+
+return (
+  <div>
+    <h1>{title}</h1>
+    <p>{description}</p>
+    <div>
+      {Object.entries(allLabels).map(([key, value]) => (
+        <p key={key}>{`${key}: ${value}`}</p>
+      ))}
+    </div>
+    <button onClick={() => changeLanguage("en_us")}>Change to English</button>
+  </div>
+);
+```

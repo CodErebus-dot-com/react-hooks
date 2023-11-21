@@ -1,0 +1,62 @@
+import { useState, useEffect, useRef } from "react";
+import {
+  IRef,
+  IUseIntersectionObserver,
+  IIntersectionObserverReturn,
+} from "../types";
+
+export const useIntersectionObserver = (
+  ref: IRef,
+  {
+    root = null,
+    rootMargin = "0%",
+    threshold = 0,
+    freezeOnceVisible = false,
+  }: IUseIntersectionObserver
+): IIntersectionObserverReturn | undefined => {
+  const [isIntersecting, setIntersecting] = useState<boolean>(false);
+  const [isObserved, setIsObserved] = useState<boolean>(false);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const elemRef = ref || useRef<HTMLDivElement | null>(null);
+
+  const cd: IntersectionObserverCallback = (entries) => {
+    for (const entry of entries) {
+      const intersecting = entry.isIntersecting;
+      setIntersecting(intersecting);
+
+      if (intersecting && freezeOnceVisible) {
+        setIsObserved(true);
+      }
+    }
+  };
+  const options = {
+    root: root,
+    rootMargin: rootMargin,
+    threshold: threshold,
+  };
+
+  useEffect(() => {
+    if (!("IntersectionObserver" in window)) {
+      throw new Error("IntersectionObserver not supported");
+    }
+
+    observer.current = new window.IntersectionObserver(cd, options);
+  }, []);
+
+  useEffect(() => {
+    if (elemRef.current && observer.current) {
+      if (isObserved) {
+        return observer.current.unobserve(elemRef.current);
+      } else {
+        return observer.current.observe(elemRef.current);
+      }
+    }
+    return () => {
+      if (elemRef.current && observer.current) {
+        observer.current.unobserve(elemRef.current);
+      }
+    };
+  }, [isObserved]);
+
+  return { isIntersecting, elemRef };
+};

@@ -1,0 +1,143 @@
+import { useState } from "react";
+import { FetchOptions, CustomError, UseFetchResult } from "../types";
+
+/**
+ * Creates a custom error instance.
+ * @param {string} message - The error message.
+ * @param {Response} response - The response object.
+ * @return {CustomError} - Returns a custom error instance.
+ */
+const createCustomError = (
+  message: string,
+  response: Response
+): CustomError => ({
+  message,
+  response,
+});
+
+/**
+ * Perform status check on the response. If the response is not ok, throw an error.
+ * @param {Response} response - The fetch API response.
+ * @return {Promise<Response>} - Returns the response if it's ok, otherwise throws an error.
+ * @throws {CustomError} - Throws a custom error with the response.
+ */
+const statusCheck = async (response: Response): Promise<Response> => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw createCustomError(
+      `${response.status}: ${response.statusText} ${JSON.stringify(errorData)}`,
+      response
+    );
+  }
+  return response;
+};
+
+/**
+ * Custom hook for fetching data using GET method
+ * @param {string} url - The URL you want to fetch data from.
+ * @param {FetchOptions} options - Options for configuring the fetch request.
+ * @return {Promise<Response>} - Returns the response data.
+ */
+const queryData = async (
+  url: string,
+  options: FetchOptions
+): Promise<Response> => {
+  const response = await fetch(url, { ...options, method: "GET" });
+  await statusCheck(response);
+  return response.json();
+};
+
+/**
+ * Custom hook for fetching data using non-GET methods (POST, PUT, DELETE etc.)
+ * @param {string} url - The URL you want to fetch data from.
+ * @param {FetchOptions} options - Options for configuring the fetch request.
+ * @return {Promise<Response>} - Returns the response data.
+ */
+const mutateData = async (
+  url: string,
+  options: FetchOptions
+): Promise<Response> => {
+  // if (!options.body) throw new Error("Body is required for non-GET methods");
+  const response = await fetch(url, options);
+  await statusCheck(response);
+  return response.json();
+};
+
+const defaultHeaders = {
+  "Content-Type": "application/json",
+};
+
+/**
+ * Custom hook for fetching data using either GET or non-GET methods (POST, PUT, DELETE etc.)
+ * @param {string} url - The URL you want to fetch data from.
+ * @param {FetchOptions} options - Options for configuring the fetch request.
+ * @returns {UseFetchResult<T>} - Returns the result object.
+ */
+export const useFetch = <T>(
+  url: string,
+  options: FetchOptions = {}
+): UseFetchResult<T> => {
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<CustomError | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [fetchPerformed, setFetchPerformed] = useState<boolean>(false);
+
+  const {
+    headers,
+    isCredentialsForCrossOrigin,
+    cache,
+    redirect,
+    referrerPolicy,
+    body = null,
+    refetch = 3,
+    retryAfter = 1000,
+    ...rest
+  } = options;
+
+  const payload: RequestInit = {
+    ...rest,
+    headers: { ...defaultHeaders, ...headers },
+    body: body || null,
+    mode: "cors",
+    cache: cache || "no-cache",
+    credentials: isCredentialsForCrossOrigin ? "include" : "same-origin",
+    redirect: redirect || "follow",
+    referrerPolicy: referrerPolicy || "no-referrer",
+  };
+
+  const fetchData = async (currentFetchCount: number) => {
+    try {
+      setLoading(true);
+      if (
+        options.method === "GET" ||
+        options.method === "DELETE" ||
+        options.method === undefined
+      ) {
+        if (options.method === undefined) options.method = "GET";
+        const response = (await queryData(url, payload)) as T;
+        setData(response);
+      } else {
+        if (options.body === undefined)
+          throw new Error("Body is required for non-GET OR non-DELETE methods");
+        const response = (await mutateData(url, payload)) as T;
+        setData(response);
+      }
+    } catch (error) {
+      if (currentFetchCount < refetch) {
+        await new Promise((resolve) => setTimeout(resolve, retryAfter));
+        fetchData(currentFetchCount + 1); // calls 3 more times after the inital call if refetch is 3
+      } else {
+        setError(error as CustomError);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!fetchPerformed) {
+    setFetchPerformed(true);
+    fetchData(0); // first call
+  }
+
+  return { data, error, loading };
+};

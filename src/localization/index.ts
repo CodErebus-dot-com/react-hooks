@@ -1,0 +1,58 @@
+import { useState, useEffect } from "react";
+import { useFetch } from "../fetch";
+import {
+  FetchOptions,
+  AllLabelsGetter,
+  LabelGetter,
+  Cache,
+  CacheRecord,
+} from "../types";
+
+const cache: Cache = {};
+const basePath = window.location.origin; // default base path
+
+export const getLanguageFromLocalStorage = (languageStorageKey: string | undefined): string => {
+  const language = languageStorageKey && localStorage.getItem(languageStorageKey);
+  return language || "en_us"; // en-us is the default locale
+};
+
+export const getCacheKey = (language: string, url: string): string => {
+  url = url.replace(/[-/]/g, "_");
+  return `${language}_${url}`;
+};
+
+export const useLocalizedContent = (
+  url: string,
+  languageStorageKey?: string,
+  fetchOptions?: FetchOptions,
+): [boolean, LabelGetter, AllLabelsGetter] => {
+  const [loading, setLoading] = useState(true);
+  const language = getLanguageFromLocalStorage(languageStorageKey);
+  const cacheKey = getCacheKey(language, url);
+  const localizedUrl = `${basePath}/${language}/${url}`;
+
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = {};
+  }
+
+  const getAllLabels = () => cache[cacheKey];
+  const getLabel: LabelGetter = (label) => cache[cacheKey]?.[label];
+
+  const { data, error } = useFetch(localizedUrl, fetchOptions);
+
+  useEffect(() => {
+    setLoading(true);
+
+    if (data) {
+      cache[cacheKey] = data as CacheRecord;
+      setLoading(false);
+    }
+
+    if (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  }, [data, error]);
+
+  return [loading, getLabel, getAllLabels];
+};
