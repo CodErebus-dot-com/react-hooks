@@ -1,15 +1,12 @@
 # React Hooks
 
-This package offers two powerful ways to enhance your React development experience:
+A collection of custom react hooks
 
-1. **Installable Package:** Get instant access to a comprehensive library of custom react hooks. Simply install the package to incorporate advanced functionality into your react based applications with minimal effort.
-2. **CLI Tool:** Generate a customizable shared react hooks package tailored to your specific needs within a monorepo setup. The CLI tool scaffolds everything you need, allowing you to maintain and scale your development with ease.
+![npm](https://img.shields.io/npm/v/{{rootPackageName}}?logo=npm)
+![NPM](https://img.shields.io/npm/l/{{rootPackageName}})
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/rootPackageName)
 
-![npm](https://img.shields.io/npm/v/@coderebus/react-hooks?logo=npm)
-![NPM](https://img.shields.io/npm/l/@coderebus/react-hooks)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/@coderebus/react-hooks)
-![Coverage](https://img.shields.io/badge/coverage-95-emeraldgreen)
-
+// sample badge: ![npm](https://img.shields.io/npm/v/{{rootPackageName}}?logo=npm)
 Badges from [Shields](https://shields.io/)
 
 ## Table of Contents
@@ -28,13 +25,13 @@ Badges from [Shields](https://shields.io/)
 
 ```bash
 #using npm
-npm install @coderebus/react-hooks
+npm install {{rootPackageName}}
 
 #using yarn
-yarn add @coderebus/react-hooks
+yarn add {{rootPackageName}}
 
 #using pnpm
-pnpm add @coderebus/react-hooks
+pnpm add {{rootPackageName}}
 ```
 
 ## useFetch()
@@ -54,7 +51,7 @@ a. GET method
 - If you are providing the options object, you do not have to explicitly provide the method property, as 'GET' is assumed by default.
 
 ```jsx
-import { useFetch } from "@coderebus/react-hooks/fetch";
+import { useFetch } from "{{rootPackageName}}/fetch";
 
 const { data, error, loading } = useFetch(url);
 
@@ -122,9 +119,9 @@ useLocalStorage hook is used to store data in the browser's local storage.
 ### Usage
 
 ```jsx
-import { useLocalStorage } from "@coderebus/react-hooks/storage";
+import { useLocalStorage } from "{{rootPackageName}}/storage";
 
-const [value, setValue] = useLocalStorage < { name: string } > "name";
+const [value, setValue] = useLocalStorage<{ name: string }>("name");
 
 const handleSetValue = () => {
   setValue({ name: "Jane Doe" });
@@ -158,9 +155,9 @@ useSessionStorage hook is used to store data in the browser's session storage.
 ### Usage
 
 ```jsx
-import { useSessionStorage } from "@coderebus/react-hooks/storage";
+import { useSessionStorage } from "{{rootPackageName}}/storage";
 
-const [tokenId, setTokenId] = useSessionStorage < { token: string } > "token";
+const [tokenId, setTokenId] = useSessionStorage<{ token: string }>("token");
 
 const addTokenId = () => {
   setTokenId({ token: "jvV8VIjvhadV73WEVjh7VKHJ798ha" });
@@ -199,7 +196,7 @@ useIntersectionObserver hook is used to observe the intersection of a target ele
 a. using default values
 
 ```jsx
-import { useIntersectionObserver } from "@coderebus/react-hooks/intersection";
+import { useIntersectionObserver } from "{{rootPackageName}}/intersection";
 const [isIntersecting, targetRef] = useIntersectionObserver(ref, {});
 
 return (
@@ -213,10 +210,10 @@ return (
 b. using custom values
 
 ```jsx
-import { useIntersectionObserver } from "@coderebus/react-hooks/intersection";
+import { useIntersectionObserver } from "{{rootPackageName}}/intersection";
 import { useRef } from "react";
 
-const ref = (useRef < HTMLDivElement) | (null > null); // custom ref element
+const ref = useRef<HTMLDivElement | null>(null); // custom ref element
 const [isIntersecting] = useIntersectionObserver(ref, {
   root: null,
   rootMargin: "10px",
@@ -246,11 +243,11 @@ The hook returns the debounced value.
 ### Usage
 
 ```jsx
-import { ChangeEvent, useState } from "react";
-import { useDebounce } from "@coderebus/react-hooks/debounce";
+import { ChangeEvent, useState } from 'react';
+import { useDebounce } from "{{rootPackageName}}/debounce";
 
-const [searchTerm, setSearchTerm] = useState < string > "";
-const debouncedSearch = useDebounce < string > (searchTerm, 500);
+const [searchTerm, setSearchTerm] = useState<string>('');
+const debouncedSearch = useDebounce<string>(searchTerm, 500);
 
 const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
   setSearchTerm(e.target.value);
@@ -259,10 +256,10 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
 return (
   <div>
     <input
-      type='text'
+      type="text"
       value={searchTerm}
       onChange={handleChange}
-      placeholder='Search...'
+      placeholder="Search..."
     />
     <div>{debouncedValue}</div>
   </div>
@@ -284,7 +281,7 @@ The hook returns the throttled value.
 
 ```jsx
 import { useState, useEffect } from "react";
-import { useThrottle } from "@coderebus/react-hooks/throttle";
+import { useThrottle } from "{{rootPackageName}}/throttle";
 
 const [scrollPosition, setScrollPosition] = useState(0);
 const throttledValue = useThrottle(scrollPosition, 200);
@@ -326,8 +323,8 @@ useLocalizedContent hook is used to handle localized content retrieval, caching,
 ### Usage
 
 ```jsx
-import { useLocalizedContent } from "@coderebus/react-hooks/localization";
-import { useLocalStorage } from "@coderebus/react-hooks/storage";
+import { useLocalStorage } from "{{rootPackageName}}/storage";
+import { useLocalizedContent } from "{{rootPackageName}}/localization";
 
 const url = "/data"; // BASE_PATH
 const [data, setData] = useLocalStorage("my-language-key", "es_es");

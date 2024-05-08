@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FetchOptions, CustomError, UseFetchResult } from "../types";
+import { useState } from 'react';
+import { FetchOptions, CustomError, UseFetchResult } from '../types';
 
 /**
  * Creates a custom error instance.
@@ -7,10 +7,7 @@ import { FetchOptions, CustomError, UseFetchResult } from "../types";
  * @param {Response} response - The response object.
  * @return {CustomError} - Returns a custom error instance.
  */
-const createCustomError = (
-  message: string,
-  response: Response
-): CustomError => ({
+const createCustomError = (message: string, response: Response): CustomError => ({
   message,
   response,
 });
@@ -26,7 +23,7 @@ const statusCheck = async (response: Response): Promise<Response> => {
     const errorData = await response.json().catch(() => ({}));
     throw createCustomError(
       `${response.status}: ${response.statusText} ${JSON.stringify(errorData)}`,
-      response
+      response,
     );
   }
   return response;
@@ -38,11 +35,8 @@ const statusCheck = async (response: Response): Promise<Response> => {
  * @param {FetchOptions} options - Options for configuring the fetch request.
  * @return {Promise<Response>} - Returns the response data.
  */
-const queryData = async (
-  url: string,
-  options: FetchOptions
-): Promise<Response> => {
-  const response = await fetch(url, { ...options, method: "GET" });
+const queryData = async (url: string, options: FetchOptions): Promise<Response> => {
+  const response = await fetch(url, { ...options, method: 'GET' });
   await statusCheck(response);
   return response.json();
 };
@@ -53,10 +47,7 @@ const queryData = async (
  * @param {FetchOptions} options - Options for configuring the fetch request.
  * @return {Promise<Response>} - Returns the response data.
  */
-const mutateData = async (
-  url: string,
-  options: FetchOptions
-): Promise<Response> => {
+const mutateData = async (url: string, options: FetchOptions): Promise<Response> => {
   // if (!options.body) throw new Error("Body is required for non-GET methods");
   const response = await fetch(url, options);
   await statusCheck(response);
@@ -64,7 +55,7 @@ const mutateData = async (
 };
 
 const defaultHeaders = {
-  "Content-Type": "application/json",
+  'Content-Type': 'application/json',
 };
 
 /**
@@ -73,10 +64,7 @@ const defaultHeaders = {
  * @param {FetchOptions} options - Options for configuring the fetch request.
  * @returns {UseFetchResult<T>} - Returns the result object.
  */
-export const useFetch = <T>(
-  url: string,
-  options: FetchOptions = {}
-): UseFetchResult<T> => {
+export const useFetch = <T>(url: string, options: FetchOptions = {}): UseFetchResult<T> => {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<CustomError | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -98,33 +86,29 @@ export const useFetch = <T>(
     ...rest,
     headers: { ...defaultHeaders, ...headers },
     body: body || null,
-    mode: "cors",
-    cache: cache || "no-cache",
-    credentials: isCredentialsForCrossOrigin ? "include" : "same-origin",
-    redirect: redirect || "follow",
-    referrerPolicy: referrerPolicy || "no-referrer",
+    mode: 'cors',
+    cache: cache || 'no-cache',
+    credentials: isCredentialsForCrossOrigin ? 'include' : 'same-origin',
+    redirect: redirect || 'follow',
+    referrerPolicy: referrerPolicy || 'no-referrer',
   };
 
   const fetchData = async (currentFetchCount: number) => {
     try {
       setLoading(true);
-      if (
-        options.method === "GET" ||
-        options.method === "DELETE" ||
-        options.method === undefined
-      ) {
-        if (options.method === undefined) options.method = "GET";
+      if (options.method === 'GET' || options.method === 'DELETE' || options.method === undefined) {
+        if (options.method === undefined) options.method = 'GET';
         const response = (await queryData(url, payload)) as T;
         setData(response);
       } else {
         if (options.body === undefined)
-          throw new Error("Body is required for non-GET OR non-DELETE methods");
+          throw new Error('Body is required for non-GET OR non-DELETE methods');
         const response = (await mutateData(url, payload)) as T;
         setData(response);
       }
     } catch (error) {
       if (currentFetchCount < refetch) {
-        await new Promise((resolve) => setTimeout(resolve, retryAfter));
+        await new Promise(resolve => setTimeout(resolve, retryAfter));
         fetchData(currentFetchCount + 1); // calls 3 more times after the inital call if refetch is 3
       } else {
         setError(error as CustomError);
