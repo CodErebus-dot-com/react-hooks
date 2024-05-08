@@ -1,0 +1,59 @@
+{
+  "name": "{{rootPackageName}}",
+  "description": "A collection of custom React hooks",
+  "version": "1.0.0",
+  "keywords": [
+    "useDebounce",
+    "useLocalStorage",
+    "useSessionStorage",
+    "useThrottle",
+    "useIntersection",
+    "useLocalizedContent",
+    "useFetch",
+    "react",
+    "hooks"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "{commandType} lint -- --fix",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "bump": "bump",
+    "pub": "{commandType} bump && {commandType} build && cd dist && npm publish"
+  },
+  "devDependencies": {
+    "@jsdevtools/version-bump-prompt": "{latest}",
+    "@testing-library/react": "{latest}",
+    "@testing-library/react-hooks": "{latest}",
+    "@types/jest": "{latest}",
+    "@types/node": "{latest}",
+    "@types/react": "{latest}",
+    "@types/react-dom": "{latest}",
+    "eslint": "{latest}",
+    "jest": "{latest}",
+    "jest-environment-jsdom": "{latest}",
+    "react": "{latest}",
+    "react-dom": "{latest}",
+    "react-test-renderer": "{latest}",
+    "rimraf": "{latest}",
+    "ts-jest": "{latest}",
+    "tsup": "{latest}",
+    "typescript": "{latest}"
+  },
+  "peerDependencies": {
+    "react": "^18.x",
+    "react-dom": "^18.x"
+  }
+}

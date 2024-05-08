@@ -1,14 +1,19 @@
 {
   "compilerOptions": {
-    "moduleResolution": "node",
-    "strict": true,
-    "removeComments": true,
-    "skipLibCheck": true,
-    "noImplicitAny": true,
+    "rootDirs": ["bin", "src"],
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "inlineSources": false,
+    "isolatedModules": true,
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "strictNullChecks": true,
-    "esModuleInterop": false
+    "preserveWatchOutput": true,
+    "skipLibCheck": true,
+    "strict": true
   },
-  "exclude": ["node_modules", "src/__tests__"]
+  "include": ["bin", "src"],
+  "exclude": ["node_modules"]
 }
